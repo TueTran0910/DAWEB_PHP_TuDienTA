@@ -3,6 +3,7 @@ session_start(); // Bắt buộc phải có dòng này đầu tiên để tạo 
 include '../includes/connect_sql.php';
 
 $loi = "";
+$thanh_cong = false;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = trim($_POST['username']);
@@ -28,10 +29,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Lưu thông tin vào SESSION
             $_SESSION['id_nguoi_dung'] = $row['id_user']; // QUAN TRỌNG: dùng id_user
             $_SESSION['ten_nguoi_dung'] = $row['ten_dang_nhap'];
+            $thanh_cong = true;
             
             // Chuyển hướng về trang chủ
-            header("Location: ../index.php"); 
-            exit();
+            // header("Location: ../index.php"); 
+            // exit();
         } else {
             $loi = "Mật khẩu không đúng!";
         }
@@ -48,6 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Nhập</title>
     <link rel="stylesheet" href="../css/register.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -77,6 +80,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <a href="register.php">Chưa có tài khoản?</a>
     </div>
 </div>
+
+<?php if ($thanh_cong): ?>
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Xin chào <?php echo $_SESSION['ten_nguoi_dung']; ?>!',
+        text: 'Đang chuyển về trang chủ...',
+        timer: 2000, // Tự tắt sau 2 giây
+        showConfirmButton: false,
+        heightAuto: false
+    }).then(() => {
+        // Sau khi popup tắt thì chuyển trang
+        window.location.href = '../index.php';
+    });
+</script>
+<?php endif; ?>
 
 </body>
 </html>

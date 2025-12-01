@@ -3,6 +3,7 @@ include '../includes/connect_sql.php';
 
 $thong_bao = "";
 $loi = "";
+$thanh_cong = false;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -55,6 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_insert->bind_param("sss", $user, $pass_hash, $email);
             
             if ($stmt_insert->execute()) {
+                $thanh_cong = true;
                 $thong_bao = "Đăng ký thành công! <a href='sign_in.php'>Đăng nhập ngay</a>";
                 $user = $email = ""; 
             } else {
@@ -72,6 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Ký Tài Khoản</title>
     <link rel="stylesheet" href="../css/register.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -115,6 +118,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <a href="sign_in.php">Đã có tài khoản?</a>
     </div>
 </div>
+
+<?php if ($thanh_cong): ?>
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Đăng ký thành công!',
+        text: 'Tài khoản đã được tạo. Bạn hãy đăng nhập ngay nhé.',
+        confirmButtonText: 'Đến trang đăng nhập',
+        confirmButtonColor: '#28a745',
+        heightAuto: false
+    }).then((result) => {
+        // Khi người dùng bấm nút OK
+        if (result.isConfirmed) {
+            window.location.href = 'sign_in.php';
+        }
+    });
+</script>
+<?php endif; ?>
 
 </body>
 </html>

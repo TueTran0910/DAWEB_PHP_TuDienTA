@@ -19,7 +19,6 @@ include 'includes/connect_sql.php';
         
         <div class="nav-links">
             <a href="pages/words.php"><i class="fas fa-search"></i> Từ vựng</a>
-            <a href="pages/the_loai.php"><i class="fas fa-layer-group"></i> Thể loại</a>
             <a href="pages/bai_thi.php"><i class="fas fa-clipboard-check"></i> Bài kiểm tra từ vựng</a>
             <a href="pages/lich_su_tra_cuu.php"><i class="fas fa-clipboard-check"></i> Lịch sử tra cứu</a>
         </div>
@@ -31,8 +30,8 @@ include 'includes/connect_sql.php';
                     <i class="fas fa-sign-out-alt"></i> Thoát
                 </a>
             <?php else: ?>  
-                <a href="pages/dang_nhap.php">Đăng nhập</a>
-                <a href="pages/dang_ky.php" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 20px;">Đăng ký</a>
+                <a href="pages/sign_in.php">Đăng nhập</a>
+                <a href="pages/register.php" style="background: #007bff; color: white; padding: 8px 15px; border-radius: 20px;">Đăng ký</a> 
             <?php endif; ?>
         </div>
     </nav>
