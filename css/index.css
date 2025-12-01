@@ -1,0 +1,173 @@
+/* File: css/style.css - Đã sửa lỗi Footer */
+
+/* 1. Thiết lập quan trọng cho thẻ HTML và BODY */
+html {
+    height: 100%; /* Đảm bảo thẻ gốc cao full màn hình */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    /* --- PHẦN SỬA LỖI FOOTER BẰNG GRID --- */
+    min-height: 100vh; /* Chiều cao tối thiểu = 100% chiều cao màn hình nhìn thấy */
+    display: grid;
+    /* Chia làm 3 hàng: 
+       - auto: Chiều cao Navbar tự động theo nội dung
+       - 1fr:  Phần nội dung chính chiếm TẤT CẢ khoảng trống còn lại (fraction)
+       - auto: Chiều cao Footer tự động theo nội dung
+    */
+    grid-template-rows: auto 1fr auto;
+    /* ------------------------------------ */
+}
+
+/* Navbar (Menu trên cùng) */
+.navbar {
+    background-color: #ffffff;
+    padding: 15px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    
+    display: flex;
+    justify-content: space-between; /* Chia đều khoảng cách 3 phần */
+    align-items: center;
+}
+
+.logo { 
+    font-size: 24px; 
+    font-weight: bold; 
+    color: #007bff; 
+    text-decoration: none; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+}
+
+/* Menu ở giữa */
+.nav-links {
+    display: flex;
+    gap: 25px; /* Khoảng cách giữa các mục menu */
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 600;
+    font-size: 16px;
+    transition: 0.2s;
+    position: relative;
+}
+
+/* Hiệu ứng khi di chuột vào menu */
+.nav-links a:hover {
+    color: #007bff;
+}
+
+/* User menu bên phải */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.user-menu a { text-decoration: none; color: #555; font-weight: 500; }
+.user-menu a:hover { color: #007bff; }
+
+/* Main Content (Nội dung chính ở giữa) */
+.main-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 40px auto; /* Căn giữa theo chiều ngang */
+    padding: 20px;
+    box-sizing: border-box; /* Để padding không làm vỡ khung */
+    /* Nhờ grid 1fr ở body, khối này sẽ tự giãn cao lên */
+}
+
+/* Search Box */
+.search-box { display: flex; gap: 10px; margin-bottom: 30px; }
+.search-box input { flex: 1; padding: 15px; border-radius: 30px; border: 1px solid #ddd; outline: none; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05) inset;}
+.search-box button { padding: 0 30px; background: #007bff; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;}
+.search-box button:hover { background: #0056b3; }
+
+/* Result Card */
+.result-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+.word-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+/* 2. Chữ tiếng Anh */
+.english-word {
+    font-size: 36px; /* Tăng to lên xíu cho đẹp */
+    font-weight: 800;
+    color: #2d3436;
+    line-height: 1; /* Ép dòng sát lại để không bị khoảng trống ảo */
+    margin: 0;      /* Xóa margin thừa */
+}
+.pronounce { color: #636e72; font-family: "Lucida Sans Unicode", sans-serif; font-size: 18px;}
+.word-type { background: #e3f2fd; color: #0d47a1; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
+.meaning { font-size: 20px; color: #d63031; margin-bottom: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px;}
+.example { font-style: italic; color: #555; background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; border-radius: 0 10px 10px 0; margin-top: 15px;}
+
+/* Nút Yêu thích & Loa */
+.btn-favorite { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 10px 20px; border-radius: 30px; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.2s; font-weight: 600;}
+.fav-no { background: #f1f2f6; color: #747d8c; border: 1px solid #dfe4ea; }
+.fav-no:hover { background: #dfe4ea; }
+.fav-yes { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+.btn-audio {
+    cursor: pointer;
+    color: #007bff;
+    
+    /* 1. Kích thước cố định */
+    width: 40px;
+    height: 40px;
+    font-size: 20px; /* Kích thước icon loa */
+    
+    background: #e3f2fd;
+    border-radius: 50%;
+    
+    /* 2. CÔNG THỨC CĂN GIỮA TUYỆT ĐỐI (Grid) */
+    /* Cách này mạnh hơn Flexbox, ép nội dung vào đúng tâm */
+    display: grid;
+    place-items: center; 
+    
+    /* 3. Chỉnh vị trí vòng tròn so với chữ "Run" */
+    margin-left: 10px; 
+    margin-top: 5px; /* Đẩy vòng tròn xuống cho thẳng hàng với chữ */
+    
+    transition: 0.2s;
+}
+
+.btn-audio i {
+    padding: 0;
+    margin: 0;
+    line-height: 1; /* Reset dòng để không bị đẩy lên cao */
+    
+    /* Mẹo nhỏ: Icon Volume của FontAwesome hơi lệch trái về mặt thị giác */
+    /* Dịch nó sang phải 1 tí xíu cho cân mắt */
+    transform: translateX(1px); 
+}
+
+.btn-audio:hover { 
+    color: #0056b3; 
+    background: #bbdefb;
+    transform: scale(1.1);
+}
+
+/* FOOTER (Chân trang) */
+.footer {
+    background-color: #2d3436; /* Màu tối hơn chút cho chuyên nghiệp */
+    color: #dfe6e9;
+    text-align: center;
+    padding: 30px 20px;
+    font-size: 14px;
+    /* Không cần margin-top: auto nữa vì Grid đã đẩy nó xuống */
+}
+.footer p { margin: 5px 0; }
+.footer a { color: #74b9ff; text-decoration: none; margin: 0 10px; transition: 0.2s;}
+.footer a:hover { color: white; text-decoration: underline;}
+
+/* Thông báo lỗi */
+.error-msg { text-align: center; color: #636e72; font-style: italic; margin-top: 50px; font-size: 18px;}

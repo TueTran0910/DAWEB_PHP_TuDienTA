@@ -1,0 +1,112 @@
+/* File: css/register.css */
+
+/* 1. Căn giữa toàn bộ trang */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5); /* Màu nền Gradient xanh */
+    height: 100vh; /* Chiều cao bằng 100% màn hình */
+    display: flex;
+    justify-content: center; /* Căn giữa ngang */
+    align-items: center; /* Căn giữa dọc */
+}
+
+/* 2. Thiết kế cái khung Form (Cái thẻ trắng) */
+.form-box {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px; /* Bo tròn góc */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Đổ bóng tạo chiều sâu */
+    width: 100%;
+    max-width: 400px; /* Độ rộng tối đa */
+}
+
+/* 3. Tiêu đề form */
+.form-box h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 4. Các ô nhập liệu */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Để padding không làm vỡ khung */
+    transition: 0.3s; /* Hiệu ứng mượt khi bấm vào */
+}
+
+/* Hiệu ứng khi bấm vào ô nhập */
+.form-group input:focus {
+    border-color: #74ebd5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(116, 235, 213, 0.5);
+}
+
+/* 5. Nút Đăng ký */
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745; /* Màu xanh lá */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #218838;
+}
+
+/* 6. Thông báo lỗi/Thành công */
+.message {
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* 7. Link về trang chủ */
+.back-link {
+    text-align: center;
+    margin-top: 20px;
+}
+.back-link a {
+    text-decoration: none;
+    color: #666;
+    font-size: 14px;
+}
+.back-link a:hover {
+    color: #000;
+    text-decoration: underline;
+}
