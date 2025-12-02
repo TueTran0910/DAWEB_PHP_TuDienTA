@@ -1,0 +1,343 @@
+/* CSS CƠ BẢN */
+:root {
+    --duo-green: #58cc02;
+    --duo-green-dark: #46a302;
+    --duo-blue: #1cb0f6;
+    --duo-blue-dark: #1899d6;
+    --duo-gray: #e5e5e5;
+    --text-color: #3c3c3c;
+    --card-shadow: 0 4px 0 #e5e5e5;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f7f7f7;
+    color: var(--text-color);
+}
+
+/* NAVBAR */
+.navbar {
+    background: #fff;
+    border-bottom: 2px solid #e5e5e5;
+    padding: 0 20px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--duo-green);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #afafaf;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--duo-blue);
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.btn-outline {
+    background-color: #fff;
+    color: var(--duo-blue);
+    border: 2px solid var(--duo-gray);
+    box-shadow: 0 4px 0 var(--duo-gray);
+}
+
+.btn-outline:active {
+    box-shadow: none;
+    transform: translateY(4px);
+}
+
+.btn-green {
+    background-color: var(--duo-green);
+    color: white;
+    box-shadow: 0 4px 0 var(--duo-green-dark);
+}
+
+.btn-green:active {
+    box-shadow: none;
+    transform: translateY(4px);
+}
+
+/* LAYOUT & SIDEBAR */
+.layout-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 40px;
+}
+
+.sidebar {
+    position: sticky;
+    top: 90px;
+    height: fit-content;
+}
+
+.sidebar-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #3c3c3c;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* RADIO BUTTON STYLE (Quan trọng) */
+.radio-item {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.radio-input {
+    display: none;
+    /* Ẩn input thật */
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    color: #777;
+    font-weight: 700;
+    padding: 12px 16px;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    transition: all 0.2s;
+    background: transparent;
+}
+
+.radio-label:hover {
+    background: #fff;
+    border-color: #e5e5e5;
+    color: var(--duo-blue);
+}
+
+/* Style khi được chọn */
+.radio-input:checked+.radio-label {
+    background: #e0f6ff;
+    border-color: var(--duo-blue);
+    color: var(--duo-blue-dark);
+    box-shadow: 0 2px 0 rgba(28, 176, 246, 0.2);
+}
+
+/* WORD CARD */
+.word-card {
+    background: white;
+    border: 2px solid #e5e5e5;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: transform 0.2s;
+}
+
+.word-card:hover {
+    transform: translateY(-3px);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.word-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--duo-green);
+}
+
+.word-pos {
+    background: #f7f7f7;
+    color: #777;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    border: 2px solid #e5e5e5;
+}
+
+.pronunciation {
+    color: #999;
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-sound {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #e5e5e5;
+    color: var(--duo-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-sound:hover {
+    border-color: var(--duo-blue);
+    transform: scale(1.1);
+}
+
+.meaning-box {
+    font-size: 18px;
+    font-weight: 700;
+    color: #3c3c3c;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #f0f0f0;
+}
+
+.example-box {
+    font-style: italic;
+    color: #777;
+    background: #f0fbf0;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 15px;
+}
+
+/* PAGINATION BUTTONS */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 40px;
+}
+
+.page-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    border: 2px solid #e5e5e5;
+    color: #777;
+    background: #fff;
+    box-shadow: 0 4px 0 #e5e5e5;
+    transition: all 0.2s;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+}
+
+.page-btn:active {
+    box-shadow: none;
+    transform: translateY(4px);
+}
+
+.page-btn:hover {
+    border-color: var(--duo-blue);
+    color: var(--duo-blue);
+}
+
+.page-btn.active {
+    background: var(--duo-blue);
+    color: #fff;
+    border-color: var(--duo-blue-dark);
+    box-shadow: 0 4px 0 var(--duo-blue-dark);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #999;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-weight: bold;
+    color: var(--duo-blue);
+    border-radius: 20px;
+}
+
+@media (max-width: 768px) {
+    .layout-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+        margin-bottom: 30px;
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        padding-bottom: 10px;
+    }
+
+    .radio-item {
+        margin-bottom: 0;
+    }
+
+    .radio-label {
+        white-space: nowrap;
+    }
+
+    .nav-links {
+        display: none;
+    }
+}
