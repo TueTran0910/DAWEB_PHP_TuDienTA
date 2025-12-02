@@ -254,6 +254,7 @@ body {
     justify-content: center;
     gap: 8px;
     margin-top: 40px;
+    flex-wrap: wrap; /* Cho phép xuống dòng nếu nhiều nút */
 }
 
 .page-btn {
@@ -315,6 +316,126 @@ body {
     border-radius: 20px;
 }
 
+/* =========================================
+   CSS CHO POPUP TẠO DANH SÁCH (SWEETALERT2)
+   ========================================= */
+
+/* 1. Tinh chỉnh khung Popup chung */
+div:where(.swal2-popup) {
+    border-radius: 20px !important;
+    padding: 30px !important;
+    font-family: 'Nunito', sans-serif !important;
+}
+
+/* Tiêu đề Popup */
+div:where(.swal2-title) {
+    color: var(--text-color) !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+}
+
+/* Nút Confirm (Lưu) */
+div:where(.swal2-confirm) {
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 0 #1899d6 !important; /* Màu bóng xanh đậm */
+    padding: 10px 24px !important;
+}
+div:where(.swal2-confirm):active {
+    box-shadow: none !important;
+    transform: translateY(4px) !important;
+}
+
+/* Nút Cancel (Hủy) */
+div:where(.swal2-cancel) {
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    color: #777 !important;
+    background: #fff !important;
+    border: 2px solid #e5e5e5 !important;
+    box-shadow: 0 4px 0 #e5e5e5 !important;
+    padding: 10px 24px !important;
+}
+div:where(.swal2-cancel):active {
+    box-shadow: none !important;
+    transform: translateY(4px) !important;
+}
+
+/* --- CÁC CLASS TÙY CHỈNH TRONG HTML POPUP --- */
+
+/* Khung chứa nội dung */
+.my-swal-content {
+    text-align: left;
+    margin-top: 10px;
+}
+
+/* Nhãn (Label) */
+.my-swal-label {
+    display: block;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+/* Ô chọn danh sách (Select) */
+.my-swal-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--duo-gray);
+    border-radius: 16px;
+    font-size: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    color: var(--text-color);
+    outline: none;
+    transition: all 0.2s;
+    background-color: #fff;
+    cursor: pointer;
+    box-sizing: border-box;
+    appearance: none; /* Xóa mũi tên mặc định */
+    /* Tạo mũi tên mới đẹp hơn */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231cb0f6%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 12px auto;
+}
+
+.my-swal-select:focus {
+    border-color: var(--duo-blue);
+    box-shadow: 0 0 0 4px rgba(28, 176, 246, 0.2);
+}
+
+/* Khu vực nhập tên mới (ẩn mặc định) */
+.my-swal-new-group {
+    margin-top: 15px;
+    display: none; /* JS sẽ bật cái này lên */
+    animation: fadeInDown 0.3s ease-out;
+}
+
+/* Ô nhập tên mới (Input) */
+.my-swal-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--duo-green);
+    border-radius: 16px;
+    font-size: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.my-swal-input:focus {
+    box-shadow: 0 0 0 4px rgba(88, 204, 2, 0.2);
+}
+
+/* Hiệu ứng hiện ra */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 768px) {
     .layout-container {
         grid-template-columns: 1fr;
@@ -339,5 +460,11 @@ body {
 
     .nav-links {
         display: none;
+    }
+    
+    .page-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
     }
 }

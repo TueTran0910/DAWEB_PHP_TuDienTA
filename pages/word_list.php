@@ -1,17 +1,18 @@
 <?php
 session_start();
-// Lưu ý đường dẫn include
 include '../includes/connect_sql.php';
 
-// --- PHẦN XỬ LÝ DATA (Dùng chung cho cả load thường và AJAX) ---
-$limit = 5; // Số từ mỗi trang
+// --- PHẦN XỬ LÝ DATA ---
+$limit = 5; 
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
+// 1. Lấy tham số
 $loai_tu_filter = isset($_GET['loai_tu']) ? $_GET['loai_tu'] : '';
+$sort_option = isset($_GET['sort']) ? $_GET['sort'] : 'az';
 
-// 1. Đếm tổng số record để phân trang
+// 2. Đếm tổng
 $sql_count = "SELECT COUNT(*) as total FROM tu_vung";
 if ($loai_tu_filter != '') {
     $sql_count .= " WHERE loai_tu = ?";
@@ -24,48 +25,65 @@ $stmt_count->execute();
 $total_records = $stmt_count->get_result()->fetch_assoc()['total'];
 $total_pages = ceil($total_records / $limit);
 
-// 2. Lấy danh sách từ vựng
+// 3. Truy vấn
 $sql = "SELECT * FROM tu_vung";
-if ($loai_tu_filter != '') {
-    $sql .= " WHERE loai_tu = ?";
-}
+if ($loai_tu_filter != '') $sql .= " WHERE loai_tu = ?";
+if ($sort_option == 'za') $sql .= " ORDER BY ten_tu_vung DESC";
+else $sql .= " ORDER BY ten_tu_vung ASC";
 $sql .= " LIMIT ? OFFSET ?";
+
 $stmt = $ket_noi->prepare($sql);
-if ($loai_tu_filter != '') {
-    $stmt->bind_param("sii", $loai_tu_filter, $limit, $offset);
-} else {
-    $stmt->bind_param("ii", $limit, $offset);
-}
+if ($loai_tu_filter != '') $stmt->bind_param("sii", $loai_tu_filter, $limit, $offset);
+else $stmt->bind_param("ii", $limit, $offset);
+
 $stmt->execute();
 $result = $stmt->get_result();
 
-// --- [QUAN TRỌNG] LOGIC AJAX ---
-// Nếu có tham số ?ajax=1, chỉ in ra danh sách từ rồi DỪNG (exit)
-// Không in ra header, footer hay html bao quanh
+// --- AJAX ---
 if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
-    renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages, $total_records);
+    renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages, $total_records, $sort_option);
     exit(); 
 }
 
-// --- HÀM RENDER HTML (Để tái sử dụng) ---
-function renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages, $total_records) {
+// --- HÀM RENDER ---
+function renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages, $total_records, $sort_option) {
     ?>
-    <h2 style="margin-bottom: 20px; color: #3c3c3c;">
-        <?php echo $loai_tu_filter == '' ? 'Tất cả từ vựng' : 'Đang lọc: ' . htmlspecialchars($loai_tu_filter); ?>
-        <span style="font-size: 14px; color: #999; font-weight: normal;">(<?php echo $total_records; ?> từ)</span>
-    </h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="color: #3c3c3c; margin: 0;">
+            <?php echo $loai_tu_filter == '' ? 'Tất cả từ vựng' : 'Lọc: ' . htmlspecialchars($loai_tu_filter); ?>
+            <span style="font-size: 14px; color: #999; font-weight: normal;">(<?php echo $total_records; ?> từ)</span>
+        </h2>
+        <div class="sort-box" style="display: flex; align-items: center; gap: 8px;">
+            <label for="sortSelect" style="font-weight: 600; color: #555; font-size: 14px;">Sắp xếp:</label>
+            <select id="sortSelect" onchange="loadPage(1)" style="padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; outline: none; cursor: pointer;">
+                <option value="az" <?php echo $sort_option == 'az' ? 'selected' : ''; ?>>A → Z</option>
+                <option value="za" <?php echo $sort_option == 'za' ? 'selected' : ''; ?>>Z → A</option>
+            </select>
+        </div>
+    </div>
 
     <?php if ($result->num_rows > 0): ?>
         <?php while ($row = $result->fetch_assoc()): ?>
             <?php 
+            // Kiểm tra xem từ này đã được lưu chưa (bất kể list nào)
             $da_thich = false;
+            $ten_list_da_luu = ""; // Biến để hiện tên list nếu đã lưu
             if (isset($_SESSION['id_nguoi_dung'])) {
                 $id_user = $_SESSION['id_nguoi_dung'];
-                $id_tu = $row['id_tuvung'];
-                $check_sql = "SELECT id_dsyt FROM yeu_thich WHERE id_user = $id_user AND id_tuvung = $id_tu";
+                $id_tu = isset($row['id_tuvung']) ? $row['id_tuvung'] : $row['id'];
+                
+                // Lấy thêm tên danh sách để hiển thị
+                $check_sql = "SELECT ds.ten_danh_sach FROM yeu_thich yt 
+                              LEFT JOIN danh_sach ds ON yt.id_danh_sach = ds.id_danh_sach
+                              WHERE yt.id_user = $id_user AND yt.id_tuvung = $id_tu LIMIT 1";
                 $res_fav = $ket_noi->query($check_sql);
-                if ($res_fav && $res_fav->num_rows > 0) $da_thich = true;
+                if ($res_fav && $res_fav->num_rows > 0) {
+                    $da_thich = true;
+                    $row_fav = $res_fav->fetch_assoc();
+                    $ten_list_da_luu = $row_fav['ten_danh_sach'] ? $row_fav['ten_danh_sach'] : "Chưa phân loại";
+                }
             }
+            $id_tu_chuan = isset($row['id_tuvung']) ? $row['id_tuvung'] : $row['id'];
             ?>
             <div class="word-card">
                 <div class="card-top">
@@ -82,20 +100,23 @@ function renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages,
                 </div>
 
                 <div class="meaning-box">👉 <?php echo htmlspecialchars($row['nghia_tieng_viet']); ?></div>
-                <?php if(!empty($row['vi_du'])): ?>
-                    <div class="example-box">"<?php echo htmlspecialchars($row['vi_du']); ?>"</div>
+                
+                <?php if(!empty($row['vi_du'])): 
+                     $tu_can_tim = $row['ten_tu_vung'];
+                     $vi_du_hien_thi = preg_replace('/(' . preg_quote($tu_can_tim, '/') . ')/i', '<b style="color:#2d3436;background-color:#fff3cd;padding:0 2px;">$1</b>', htmlspecialchars($row['vi_du']));
+                ?>
+                    <div class="example-box">"<?php echo $vi_du_hien_thi; ?>"</div>
                 <?php endif; ?>
 
                 <div style="text-align: right; margin-top: 10px;">
-                    <?php 
-                    $link_thich = "xu_ly_yeu_thich.php?id_tuvung=" . $row['id_tuvung'] . "&redirect=words";
-                    if($loai_tu_filter) $link_thich .= "&loai_tu=" . urlencode($loai_tu_filter);
-                    $link_thich .= "&page=" . $page;
-                    ?>
                     <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                        <a href="<?php echo $link_thich; ?>" class="btn <?php echo $da_thich ? 'btn-green' : 'btn-outline'; ?>">
-                            <?php if ($da_thich): echo '<i class="fas fa-check"></i> Đã lưu'; else: echo '<i class="far fa-star"></i> Lưu từ'; endif; ?>
-                        </a>
+                        <button onclick="openSaveModal(<?php echo $id_tu_chuan; ?>)" class="btn <?php echo $da_thich ? 'btn-green' : 'btn-outline'; ?>">
+                            <?php if ($da_thich): ?>
+                                <i class="fas fa-check"></i> Đã lưu: <?php echo htmlspecialchars($ten_list_da_luu); ?>
+                            <?php else: ?>
+                                <i class="far fa-star"></i> Lưu từ
+                            <?php endif; ?>
+                        </button>
                     <?php else: ?>
                         <a href="sign_in.php" class="btn btn-outline" onclick="return confirm('Đăng nhập để lưu từ nhé!');">
                             <i class="far fa-star"></i> Lưu từ
@@ -105,28 +126,55 @@ function renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages,
             </div>
         <?php endwhile; ?>
 
-        <!-- PHÂN TRANG (Dùng class pagination-btn để JS bắt sự kiện) -->
         <div class="pagination">
+            
             <?php if ($page > 1): ?>
-                <button class="page-btn" onclick="loadPage(<?php echo ($page - 1); ?>)"><i class="fas fa-chevron-left"></i></button>
+                <button type="button" class="page-btn" onclick="loadPage(1)" title="Trang đầu">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button type="button" class="page-btn" onclick="loadPage(<?php echo ($page - 1); ?>)" title="Trang trước">
+                    <i class="fas fa-angle-left"></i>
+                </button>
             <?php endif; ?>
 
-            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                <button class="page-btn <?php echo ($i == $page) ? 'active' : ''; ?>" onclick="loadPage(<?php echo $i; ?>)">
+            <?php
+            // Logic hiển thị 5 trang
+            $visible_pages = 5;
+            $start = max(1, $page - 2);
+            $end = min($total_pages, $page + 2);
+
+            if ($total_pages > $visible_pages) {
+                if ($page <= 3) $end = $visible_pages;
+                if ($page > $total_pages - 2) $start = $total_pages - 4;
+            } else {
+                $start = 1;
+                $end = $total_pages;
+            }
+
+            for ($i = $start; $i <= $end; $i++): 
+                if($i > 0 && $i <= $total_pages):
+            ?>
+                <button type="button" class="page-btn <?php echo ($i == $page) ? 'active' : ''; ?>" onclick="loadPage(<?php echo $i; ?>)">
                     <?php echo $i; ?>
                 </button>
-            <?php endfor; ?>
+            <?php 
+                endif;
+            endfor; 
+            ?>
 
             <?php if ($page < $total_pages): ?>
-                <button class="page-btn" onclick="loadPage(<?php echo ($page + 1); ?>)"><i class="fas fa-chevron-right"></i></button>
+                <button type="button" class="page-btn" onclick="loadPage(<?php echo ($page + 1); ?>)" title="Trang sau">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button type="button" class="page-btn" onclick="loadPage(<?php echo $total_pages; ?>)" title="Trang cuối">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
             <?php endif; ?>
+            
         </div>
 
     <?php else: ?>
-        <div class="empty-state">
-            <i class="fas fa-box-open" style="font-size: 60px; margin-bottom: 20px;"></i>
-            <p>Không tìm thấy từ vựng nào.</p>
-        </div>
+        <div class="empty-state"><i class="fas fa-box-open" style="font-size: 60px;"></i><p>Không tìm thấy từ vựng nào.</p></div>
     <?php endif; 
 }
 ?>
@@ -135,26 +183,26 @@ function renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages,
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kho Từ Vựng - Wordik</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../css//word_list.css">
-    
+    <link rel="stylesheet" href="../css/word_list.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
     <nav class="navbar">
         <a href="../index.php" class="logo"><i class="fas fa-feather-alt"></i> Wordik</a>
         <div class="nav-links">
-            <a href="words.php" class="active">KHO TỪ VỰNG</a>
+            <a href="word_list.php" class="active">KHO TỪ VỰNG</a>
             <a href="bai_thi.php">LUYỆN TẬP</a>
             <a href="lich_su_tra_cuu.php">LỊCH SỬ</a>
+            <a href="tu_yeu_thich.php">DANH SÁCH TƯ VỰNG YÊU THÍCH</a>
         </div>
         <div class="user-menu">
             <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
                 <span style="font-weight: 700; margin-right: 10px;">Hi, <?php echo htmlspecialchars($_SESSION['ten_nguoi_dung']); ?></span>
-                <a href="sign_out.php" class="btn btn-outline" style="border-color: #dc3545; color: #dc3545; box-shadow: 0 4px 0 #bd2130;">THOÁT</a>
+                <a href="sign_out.php" class="btn btn-outline" style="border-color: #dc3545; color: #dc3545;">THOÁT</a>
             <?php else: ?>  
                 <a href="sign_in.php" class="btn btn-outline">ĐĂNG NHẬP</a>
                 <a href="register.php" class="btn btn-green">BẮT ĐẦU</a> 
@@ -163,105 +211,141 @@ function renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages,
     </nav>
 
     <div class="layout-container">
-        <!-- SIDEBAR BỘ LỌC (RADIO BUTTONS) -->
-        <aside class="sidebar">
+        <aside class="sidebar" style="max-height: 80vh; overflow-y: auto;">
             <div class="sidebar-title"><i class="fas fa-filter"></i> Lọc theo loại</div>
             <form id="filterForm">
-                <!-- Radio Tất cả -->
                 <div class="radio-item">
                     <input type="radio" id="type_all" name="loai_tu" value="" class="radio-input" <?php echo $loai_tu_filter == '' ? 'checked' : ''; ?> onchange="loadPage(1)">
-                    <label for="type_all" class="radio-label">
-                        <span>Tất cả</span> <i class="fas fa-layer-group"></i>
-                    </label>
+                    <label for="type_all" class="radio-label"><span>Tất cả</span> <i class="fas fa-layer-group"></i></label>
                 </div>
-                <!-- Radio Danh từ -->
-                <div class="radio-item">
-                    <input type="radio" id="type_noun" name="loai_tu" value="Danh từ" class="radio-input" <?php echo $loai_tu_filter == 'Danh từ' ? 'checked' : ''; ?> onchange="loadPage(1)">
-                    <label for="type_noun" class="radio-label">
-                        <span>Danh từ</span> <i class="fas fa-cube"></i>
-                    </label>
-                </div>
-                <!-- Radio Động từ -->
-                <div class="radio-item">
-                    <input type="radio" id="type_verb" name="loai_tu" value="Động từ" class="radio-input" <?php echo $loai_tu_filter == 'Động từ' ? 'checked' : ''; ?> onchange="loadPage(1)">
-                    <label for="type_verb" class="radio-label">
-                        <span>Động từ</span> <i class="fas fa-running"></i>
-                    </label>
-                </div>
-                <!-- Radio Tính từ -->
-                <div class="radio-item">
-                    <input type="radio" id="type_adj" name="loai_tu" value="Tính từ" class="radio-input" <?php echo $loai_tu_filter == 'Tính từ' ? 'checked' : ''; ?> onchange="loadPage(1)">
-                    <label for="type_adj" class="radio-label">
-                        <span>Tính từ</span> <i class="fas fa-star"></i>
-                    </label>
-                </div>
-                <!-- Radio Giới từ -->
-                <div class="radio-item">
-                    <input type="radio" id="type_prep" name="loai_tu" value="Giới từ" class="radio-input" <?php echo $loai_tu_filter == 'Giới từ' ? 'checked' : ''; ?> onchange="loadPage(1)">
-                    <label for="type_prep" class="radio-label">
-                        <span>Giới từ</span> <i class="fas fa-random"></i>
-                    </label>
-                </div>
+                <div class="radio-item"><input type="radio" id="type_noun" name="loai_tu" value="Danh từ" class="radio-input" onchange="loadPage(1)"><label for="type_noun" class="radio-label"><span>Danh từ</span> <i class="fas fa-cube"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_verb" name="loai_tu" value="Động từ" class="radio-input" onchange="loadPage(1)"><label for="type_verb" class="radio-label"><span>Động từ</span> <i class="fas fa-running"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_adj" name="loai_tu" value="Tính từ" class="radio-input" onchange="loadPage(1)"><label for="type_adj" class="radio-label"><span>Tính từ</span> <i class="fas fa-star"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_prep" name="loai_tu" value="Giới từ" class="radio-input" onchange="loadPage(1)"><label for="type_prep" class="radio-label"><span>Giới từ</span> <i class="fas fa-random"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_pronoun" name="loai_tu" value="Đại từ" class="radio-input" onchange="loadPage(1)"><label for="type_pronoun" class="radio-label"><span>Đại từ</span> <i class="fas fa-user-tag"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_adverb" name="loai_tu" value="Trạng từ" class="radio-input" onchange="loadPage(1)"><label for="type_adverb" class="radio-label"><span>Trạng từ</span> <i class="fas fa-bolt"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_conj" name="loai_tu" value="Liên từ" class="radio-input" onchange="loadPage(1)"><label for="type_conj" class="radio-label"><span>Liên từ</span> <i class="fas fa-link"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_det" name="loai_tu" value="Từ hạn định" class="radio-input" onchange="loadPage(1)"><label for="type_det" class="radio-label"><span>Từ hạn định</span> <i class="fas fa-hand-point-right"></i></label></div>
+                <div class="radio-item"><input type="radio" id="type_inter" name="loai_tu" value="Thán từ" class="radio-input" onchange="loadPage(1)"><label for="type_inter" class="radio-label"><span>Thán từ</span> <i class="fas fa-exclamation-circle"></i></label></div>
             </form>
         </aside>
 
-        <!-- KHU VỰC HIỂN THỊ DANH SÁCH (Sẽ reload bằng JS) -->
         <main class="content" style="position: relative; min-height: 400px;">
-            <div class="loading-overlay" id="loadingOverlay">
-                <i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i> Đang tải...
-            </div>
-            
+            <div class="loading-overlay" id="loadingOverlay"><i class="fas fa-spinner fa-spin"></i></div>
             <div id="wordListContainer">
-                <?php renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages, $total_records); ?>
+                <?php renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages, $total_records, $sort_option); ?>
             </div>
         </main>
     </div>
 
-    <!-- JAVASCRIPT XỬ LÝ -->
     <script>
-        // 1. Hàm đọc từ vựng
         function docTu(tu_vung) {
             if ('speechSynthesis' in window) {
-                var msg = new SpeechSynthesisUtterance();
-                msg.text = tu_vung; msg.lang = 'en-US'; msg.rate = 0.8;
-                window.speechSynthesis.speak(msg);
+                var msg = new SpeechSynthesisUtterance(); msg.text = tu_vung; msg.lang = 'en-US'; window.speechSynthesis.speak(msg);
             } else { alert("Trình duyệt không hỗ trợ âm thanh."); }
         }
 
-        // 2. Hàm AJAX Load dữ liệu
-        function loadPage(pageNumber) {
-            // Lấy loại từ đang được chọn từ Radio Button
-            const radios = document.getElementsByName('loai_tu');
-            let selectedType = '';
-            for (const radio of radios) {
-                if (radio.checked) {
-                    selectedType = radio.value;
-                    break;
-                }
+        // HÀM HIỆN POPUP CHỌN DANH SÁCH (MỚI)
+        async function openSaveModal(id_tuvung) {
+            // 1. Gọi API lấy danh sách list cũ
+            const response = await fetch('ajax_save_word.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'action=get_lists'
+            });
+            const result = await response.json();
+
+            if(result.status === 'error') {
+                Swal.fire('Lỗi', result.message, 'error'); return;
             }
 
-            // Hiện loading
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            // 2. Tạo HTML cho Popup
+            let options = `<option value="new">+ Tạo danh sách mới...</option>`;
+            if(result.data.length > 0) {
+                options += `<optgroup label="Danh sách của bạn">`;
+                result.data.forEach(l => {
+                    options += `<option value="${l.id_danh_sach}">${l.ten_danh_sach}</option>`;
+                });
+                options += `</optgroup>`;
+            }
 
-            // Gọi AJAX về chính file này nhưng thêm ?ajax=1
-            const url = `words.php?ajax=1&page=${pageNumber}&loai_tu=${encodeURIComponent(selectedType)}`;
+            // 3. Hiện Popup
+            const { value: formValues } = await Swal.fire({
+                title: 'Lưu vào danh sách',
+                html:
+                    `<p style="margin-bottom:5px; text-align:left;">Chọn danh sách:</p>` +
+                    `<select id="swal-list" class="swal2-input" style="margin:0 0 15px 0;">${options}</select>` +
+                    `<input id="swal-new" class="swal2-input" placeholder="Nhập tên danh sách mới..." style="display:block; margin:0;">`,
+                showCancelButton: true,
+                confirmButtonText: 'Lưu ngay',
+                didOpen: () => {
+                    const select = document.getElementById('swal-list');
+                    const input = document.getElementById('swal-new');
+                    
+                    // Nếu có list cũ, chọn nó và ẩn input đi
+                    if(result.data.length > 0) {
+                        select.value = result.data[0].id_danh_sach;
+                        input.style.display = 'none';
+                    }
+
+                    select.onchange = () => {
+                        input.style.display = (select.value === 'new') ? 'block' : 'none';
+                        if(select.value === 'new') input.focus();
+                    };
+                },
+                preConfirm: () => {
+                    const select = document.getElementById('swal-list');
+                    const input = document.getElementById('swal-new');
+                    return {
+                        mode: select.value === 'new' ? 'new' : 'existing',
+                        val: select.value === 'new' ? input.value : select.value
+                    }
+                }
+            });
+
+            // 4. Gửi dữ liệu đi lưu
+            if (formValues) {
+                if(formValues.mode === 'new' && !formValues.val) {
+                    Swal.fire('Lỗi', 'Tên danh sách không được để trống', 'warning'); return;
+                }
+
+                const saveRes = await fetch('ajax_save_word.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=save_word&id_tuvung=${id_tuvung}&mode=${formValues.mode}&list_val=${encodeURIComponent(formValues.val)}`
+                });
+                const saveResult = await saveRes.json();
+                
+                if(saveResult.status === 'saved' || saveResult.status === 'removed') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: saveResult.message,
+                        toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
+                    });
+                    // Reload lại trang hiện tại (trang 1) để cập nhật trạng thái nút bấm
+                    // Hoặc tốt hơn là chỉ update DOM, nhưng reload cho đơn giản
+                    setTimeout(() => loadPage(<?php echo $page; ?>), 1000); 
+                } else {
+                    Swal.fire('Lỗi', saveResult.message, 'error');
+                }
+            }
+        }
+
+        function loadPage(pageNumber) {
+            const radios = document.getElementsByName('loai_tu');
+            let selectedType = '';
+            for (const radio of radios) { if (radio.checked) { selectedType = radio.value; break; } }
+            const sortVal = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'az';
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const url = `word_list.php?ajax=1&page=${pageNumber}&loai_tu=${encodeURIComponent(selectedType)}&sort=${sortVal}`;
 
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
-                    // Thay thế nội dung cũ bằng nội dung mới
                     document.getElementById('wordListContainer').innerHTML = html;
-                    
-                    // Ẩn loading
                     document.getElementById('loadingOverlay').style.display = 'none';
-
-                    // Scroll nhẹ lên đầu danh sách cho dễ nhìn
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                })
-                .catch(err => {
-                    console.error('Lỗi tải trang:', err);
-                    alert('Có lỗi xảy ra khi tải dữ liệu.');
-                    document.getElementById('loadingOverlay').style.display = 'none';
                 });
         }
     </script>
