@@ -128,7 +128,6 @@ if ($current_list_id != 'all') {
         <a href="../index.php" class="logo"><i class="fas fa-feather-alt"></i> Wordik</a>
         <div class="nav-links">
             <a href="word_list.php">KHO TỪ VỰNG</a>
-            <a href="bai_thi.php">LUYỆN TẬP</a>
             <a href="lich_su_tra_cuu.php">LỊCH SỬ</a>
             <a href="tu_yeu_thich.php">DANH SÁCH TỪ VỰNG YÊU THÍCH</a>
         </div>

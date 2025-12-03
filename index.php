@@ -25,7 +25,6 @@ include 'includes/connect_sql.php';
 
         <div class="nav-links">
             <a href="./pages/word_list.php">KHO TỪ VỰNG</a>
-            <a href="./pages/bai_thi.php">LUYỆN TẬP</a>
             <a href="./pages/lich_su_tra_cuu.php">LỊCH SỬ</a>
             <a href="./pages/tu_yeu_thich.php">DANH SÁCH TỪ VỰNG YÊU THÍCH</a>
         </div>

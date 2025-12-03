@@ -3,7 +3,6 @@
 
 // HÀM 1: TRA TỪ (Dùng cho trang tìm kiếm)
 function tra_tu_cohere($tu_khoa) {
-    // 👇👇 Nhớ thay KEY của bạn vào đây (giữ nguyên dấu nháy đơn) 👇👇
     $apiKey = 'RSOYigrH1dJ3nSNX2p5rEgLAaW2PdLu1ZlHJGMOK';
     
     // Model bạn vừa tìm được
@@ -24,7 +23,6 @@ function tra_tu_cohere($tu_khoa) {
 
 // HÀM 2: TẠO BÀI KIỂM TRA (Dùng cho trang Review)
 function tao_bai_kiem_tra($ds_tu_vung) {
-    // 👇👇 Nhớ thay KEY cả ở đây nữa 👇👇
     $apiKey = 'RSOYigrH1dJ3nSNX2p5rEgLAaW2PdLu1ZlHJGMOK';
     
     $modelName = 'command-r-08-2024'; 
