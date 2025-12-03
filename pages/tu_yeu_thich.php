@@ -73,24 +73,17 @@ if ($current_list_id != 'all') {
         .sidebar { background: #f8f9fa; border-right: 1px solid #eee; }
         
         .list-group-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            background: white;
-            border-radius: 8px;
-            color: #555;
-            text-decoration: none;
-            transition: 0.2s;
-            border: 1px solid transparent;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 15px; margin-bottom: 8px; background: white;
+            border-radius: 8px; color: #555; text-decoration: none;
+            transition: 0.2s; border: 1px solid transparent;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .list-group-item:hover { transform: translateX(5px); border-color: #007bff; color: #007bff; }
         .list-group-item.active { background: #e3f2fd; color: #0056b3; border-color: #b3e5fc; font-weight: 700; }
         
         .list-actions { display: none; gap: 5px; }
-        .list-group-item:hover .list-actions { display: flex; } /* Chỉ hiện nút sửa xóa khi rê chuột vào */
+        .list-group-item:hover .list-actions { display: flex; } 
         
         .action-btn {
             border: none; background: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s;
@@ -105,9 +98,27 @@ if ($current_list_id != 'all') {
         }
         .create-btn:hover { background: #218838; }
 
+        /* --- PHẦN HEADER MỚI CÓ NÚT REVIEW --- */
         .page-header {
             background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        .header-left {
+            display: flex; align-items: center; gap: 15px;
+        }
+
+        .btn-review {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white; padding: 10px 20px; border-radius: 30px;
+            text-decoration: none; font-weight: 700;
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+            transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-review:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(108, 92, 231, 0.4);
+            background: linear-gradient(135deg, #5b4cc4, #8e84e8);
         }
     </style>
 </head>
@@ -160,12 +171,26 @@ if ($current_list_id != 'all') {
 
         <main class="content">
             <div class="page-header">
-                <h2 style="margin: 0; color: #2d3436;">
-                    <?php echo htmlspecialchars($current_list_name); ?>
-                </h2>
-                <span style="background: #e3f2fd; color: #007bff; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 14px;">
-                    <?php echo $total_records; ?> từ
-                </span>
+                <div class="header-left">
+                    <h2 style="margin: 0; color: #2d3436;">
+                        <?php echo htmlspecialchars($current_list_name); ?>
+                    </h2>
+                    <span style="background: #e3f2fd; color: #007bff; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 14px;">
+                        <?php echo $total_records; ?> từ
+                    </span>
+                </div>
+
+                <div>
+                    <?php if ($total_records >= 4): ?>
+                        <a href="review.php?list=<?php echo $current_list_id; ?>" class="btn-review">
+                            <i class="fas fa-robot"></i> Ôn tập cùng AI
+                        </a>
+                    <?php else: ?>
+                         <span style="color: #999; font-size: 0.9rem; font-style: italic;">
+                            <i class="fas fa-info-circle"></i> Thêm >4 từ để dùng AI
+                         </span>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <?php if ($result_words->num_rows > 0): ?>
