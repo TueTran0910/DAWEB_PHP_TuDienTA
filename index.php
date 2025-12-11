@@ -1,8 +1,23 @@
 <?php
 session_start();
-// Đảm bảo đường dẫn file connect đúng với cấu trúc thư mục của bạn
-// Nếu lỗi, hãy kiểm tra lại đường dẫn: include 'includes/connect_sql.php';
+// Kết nối CSDL
 include 'includes/connect_sql.php';
+// Kết nối AI Helper (Đảm bảo bạn đã tạo file này theo hướng dẫn trước)
+include 'includes/cohere_helper.php'; 
+
+// --- HÀM LƯU LỊCH SỬ TRA CỨU ---
+function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
+    // 1. Lấy từ vừa tra gần nhất của user này
+    $check = $ket_noi->query("SELECT id_tuvung FROM lich_su WHERE id_user = $id_user ORDER BY thoi_gian_tra DESC LIMIT 1");
+    $last_id = ($check && $check->num_rows > 0) ? $check->fetch_assoc()['id_tuvung'] : 0;
+
+    // 2. Nếu từ hiện tại KHÁC từ vừa tra thì mới lưu (tránh spam F5)
+    if ($last_id != $id_tuvung) {
+        $stmt = $ket_noi->prepare("INSERT INTO lich_su (id_user, id_tuvung, thoi_gian_tra) VALUES (?, ?, NOW())");
+        $stmt->bind_param("ii", $id_user, $id_tuvung);
+        $stmt->execute();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -12,7 +27,6 @@ include 'includes/connect_sql.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wordik - Học từ vựng vui nhộn</title>
-    <!-- Font chữ Nunito cho giống Duolingo -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="./css/index.css">
@@ -25,7 +39,7 @@ include 'includes/connect_sql.php';
 
         <div class="nav-links">
             <a href="./pages/word_list.php">KHO TỪ VỰNG</a>
-            <a href="./pages/lich_su_tra_cuu.php">LỊCH SỬ</a>
+            <a href="./pages/word_history.php">LỊCH SỬ</a>
             <a href="./pages/tu_yeu_thich.php">DANH SÁCH TỪ VỰNG YÊU THÍCH</a>
         </div>
 
@@ -100,6 +114,7 @@ include 'includes/connect_sql.php';
         </div>
 
         <?php
+        // RANDOM TỪ VỰNG MỖI NGÀY
         if(isset($ket_noi)) {
             $sql_random = "SELECT * FROM tu_vung ORDER BY RAND() LIMIT 1";
             $result_random = $ket_noi->query($sql_random);
@@ -155,87 +170,134 @@ include 'includes/connect_sql.php';
 
         <?php
         if (isset($_GET['tukhoa']) && $_GET['tukhoa'] != '') {
-            $tu_khoa = $_GET['tukhoa'];
+            $tu_khoa = trim($_GET['tukhoa']);
 
             if (isset($ket_noi)) { 
+                // --- BƯỚC 1: TÌM TRONG SQL ---
                 $sql = "SELECT * FROM tu_vung WHERE ten_tu_vung = ?";
                 $stmt = $ket_noi->prepare($sql);
                 $stmt->bind_param("s", $tu_khoa);
                 $stmt->execute();
                 $ket_qua = $stmt->get_result();
 
+                // NẾU CÓ TRONG SQL
                 if ($ket_qua && $ket_qua->num_rows > 0) {
                     while ($row = $ket_qua->fetch_assoc()) {
-
-                        // Logic yêu thích
-                        $da_thich = false;
+                        // Lưu lịch sử
                         if (isset($_SESSION['id_nguoi_dung'])) {
-                            $id_user = $_SESSION['id_nguoi_dung'];
-                            $id_tu = $row['id_tuvung'];
-
-                            $check_sql = "SELECT id_dsyt FROM yeu_thich WHERE id_user = $id_user AND id_tuvung = $id_tu";
-                            $res_fav = $ket_noi->query($check_sql);
-                            if ($res_fav && $res_fav->num_rows > 0) {
-                                $da_thich = true;
-                            }
+                            luu_lich_su_tra_cuu($ket_noi, $_SESSION['id_nguoi_dung'], $row['id_tuvung']);
                         }
-        ?>
-
-                        <div class="result-card">
-                            <div class="word-header">
-                                <span class="english-word"><?php echo htmlspecialchars($row['ten_tu_vung']); ?></span>
-                                <i class="fas fa-volume-up btn-audio" onclick="docTu('<?php echo htmlspecialchars($row['ten_tu_vung']); ?>')"></i>
-                                <?php if (!empty($row['phat_am'])): ?>
-                                    <span style="color: #999;">/<?php echo htmlspecialchars($row['phat_am']); ?>/</span>
-                                <?php endif; ?>
-                                <?php if (!empty($row['loai_tu'])): ?>
-                                    <span class="word-type"><?php echo htmlspecialchars($row['loai_tu']); ?></span>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="meaning">
-                                <span style="color: var(--duo-green); margin-right: 10px;">NGHĨA LÀ:</span>
-                                <?php echo htmlspecialchars($row['nghia_tieng_viet']); ?>
-                            </div>
-
-                            <?php if (!empty($row['vi_du'])): ?>
-                                <div class="example">
-                                    <i class="fas fa-quote-left"></i> <?php echo htmlspecialchars($row['vi_du']); ?>
-                                </div>
-                            <?php endif; ?>
-
-                            <div style="margin-top: 20px; text-align: right;">
-                                <?php
-                                $link_thich = "pages/xu_ly_yeu_thich.php?id_tuvung=" . $row['id_tuvung'] . "&tukhoa=" . urlencode($tu_khoa);
-                                ?>
-
-                                <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                                    <a href="<?php echo $link_thich; ?>" class="btn <?php echo $da_thich ? 'btn-green' : 'btn-outline'; ?>" style="font-size: 12px;">
-                                        <?php if ($da_thich): ?>
-                                            <i class="fas fa-check"></i> ĐÃ LƯU TỪ
-                                        <?php else: ?>
-                                            <i class="far fa-star"></i> LƯU TỪ NÀY
-                                        <?php endif; ?>
-                                    </a>
-                                <?php else: ?>
-                                    <a href="pages/sign_in.php" class="btn btn-outline" onclick="return confirm('Đăng nhập để lưu từ nhé!');">
-                                        <i class="far fa-star"></i> LƯU TỪ
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-        <?php
+                        
+                        // Hiển thị Card
+                        hien_thi_card_tu_vung($row, $ket_noi, $tu_khoa, false);
                     }
-                } else {
-                    echo "
-                    <div style='text-align:center; margin-top:50px;'>
-                        <i class='fas fa-search' style='font-size: 80px; color: #e5e5e5; margin-bottom: 20px;'></i>
-                        <h2 style='color: #777;'>Không tìm thấy từ này!</h2>
-                        <p style='color: #999;'>Thử tìm từ 'Hello' hoặc 'Apple' xem sao nhé.</p>
-                    </div>";
+                } 
+                // NẾU KHÔNG CÓ -> HỎI AI
+                else {
+                    $ai_data = tra_tu_cohere($tu_khoa);
+
+                    if ($ai_data && isset($ai_data['nghia_tieng_viet'])) {
+                        // Hiển thị Card AI (Màu tím)
+                        hien_thi_card_tu_vung($ai_data, $ket_noi, $tu_khoa, true);
+
+                        // Lưu AI vào SQL để lần sau không tốn tiền API nữa
+                        try {
+                            $stmt_ins = $ket_noi->prepare("INSERT INTO tu_vung (ten_tu_vung, phat_am, loai_tu, nghia_tieng_viet, vi_du) VALUES (?, ?, ?, ?, ?)");
+                            $stmt_ins->bind_param("sssss", 
+                                $ai_data['ten_tu_vung'], $ai_data['phat_am'], 
+                                $ai_data['loai_tu'], $ai_data['nghia_tieng_viet'], $ai_data['vi_du']
+                            );
+                            $stmt_ins->execute();
+                            $new_id = $ket_noi->insert_id;
+
+                            // Lưu lịch sử cho từ mới này
+                            if (isset($_SESSION['id_nguoi_dung']) && $new_id > 0) {
+                                luu_lich_su_tra_cuu($ket_noi, $_SESSION['id_nguoi_dung'], $new_id);
+                            }
+                        } catch (Exception $e) { /* Bỏ qua lỗi insert */ }
+
+                    } else {
+                        // Không tìm thấy cả trong SQL lẫn AI
+                        echo "
+                        <div style='text-align:center; margin-top:50px;'>
+                            <i class='fas fa-robot' style='font-size: 80px; color: #e5e5e5; margin-bottom: 20px;'></i>
+                            <h2 style='color: #777;'>AI cũng bó tay rồi!</h2>
+                            <p style='color: #999;'>Từ '<b>".htmlspecialchars($tu_khoa)."</b>' khó quá hoặc không tồn tại.</p>
+                        </div>";
+                    }
                 }
             }
+        }
+
+        // HÀM HIỂN THỊ CARD (ĐỂ GỌN CODE)
+        function hien_thi_card_tu_vung($row, $ket_noi, $tu_khoa, $is_ai = false) {
+            // Logic yêu thích
+            $da_thich = false;
+            if (isset($_SESSION['id_nguoi_dung']) && isset($row['id_tuvung'])) {
+                $id_user = $_SESSION['id_nguoi_dung'];
+                $id_tu = $row['id_tuvung'];
+                $check_sql = "SELECT id_dsyt FROM yeu_thich WHERE id_user = $id_user AND id_tuvung = $id_tu";
+                $res_fav = $ket_noi->query($check_sql);
+                if ($res_fav && $res_fav->num_rows > 0) $da_thich = true;
+            }
+            
+            // Style AI: Viền tím
+            $style = $is_ai ? "border: 2px solid #a29bfe; box-shadow: 0 8px 20px rgba(162, 155, 254, 0.2);" : "";
+            ?>
+            <div class="result-card" style="<?php echo $style; ?>">
+                <?php if($is_ai): ?>
+                    <div style="text-align:right; margin-bottom:5px;">
+                        <span style="background:#a29bfe; color:white; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:bold;">✨ AI Generated</span>
+                    </div>
+                <?php endif; ?>
+
+                <div class="word-header">
+                    <span class="english-word"><?php echo htmlspecialchars($row['ten_tu_vung']); ?></span>
+                    <i class="fas fa-volume-up btn-audio" onclick="docTu('<?php echo htmlspecialchars($row['ten_tu_vung']); ?>')"></i>
+                    <?php if (!empty($row['phat_am'])): ?>
+                        <span style="color: #999;">/<?php echo htmlspecialchars($row['phat_am']); ?>/</span>
+                    <?php endif; ?>
+                    <?php if (!empty($row['loai_tu'])): ?>
+                        <span class="word-type"><?php echo htmlspecialchars($row['loai_tu']); ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="meaning">
+                    <span style="color: var(--duo-green); margin-right: 10px;">NGHĨA LÀ:</span>
+                    <?php echo htmlspecialchars($row['nghia_tieng_viet']); ?>
+                </div>
+
+                <?php if (!empty($row['vi_du'])): ?>
+                    <div class="example">
+                        <i class="fas fa-quote-left"></i> <?php echo htmlspecialchars($row['vi_du']); ?>
+                    </div>
+                <?php endif; ?>
+
+                <div style="margin-top: 20px; text-align: right;">
+                    <?php if (isset($row['id_tuvung'])): 
+                        $link_thich = "pages/xu_ly_yeu_thich.php?id_tuvung=" . $row['id_tuvung'] . "&tukhoa=" . urlencode($tu_khoa);
+                    ?>
+                        <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
+                            <a href="<?php echo $link_thich; ?>" class="btn <?php echo $da_thich ? 'btn-green' : 'btn-outline'; ?>" style="font-size: 12px;">
+                                <?php if ($da_thich): ?>
+                                    <i class="fas fa-check"></i> ĐÃ LƯU TỪ
+                                <?php else: ?>
+                                    <i class="far fa-star"></i> LƯU TỪ NÀY
+                                <?php endif; ?>
+                            </a>
+                        <?php else: ?>
+                            <a href="pages/sign_in.php" class="btn btn-outline" onclick="return confirm('Đăng nhập để lưu từ nhé!');">
+                                <i class="far fa-star"></i> LƯU TỪ
+                            </a>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <button onclick="location.reload()" class="btn btn-outline" style="font-size: 12px;">
+                            <i class="fas fa-sync"></i> TẢI LẠI ĐỂ LƯU
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php
         }
         ?>
     </div>
@@ -284,5 +346,4 @@ include 'includes/connect_sql.php';
     </script>
 
 </body>
-
 </html>

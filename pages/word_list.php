@@ -195,7 +195,7 @@ function renderWordList($result, $ket_noi, $loai_tu_filter, $page, $total_pages,
         <a href="../index.php" class="logo"><i class="fas fa-feather-alt"></i> Wordik</a>
         <div class="nav-links">
             <a href="word_list.php" class="active">KHO TỪ VỰNG</a>
-            <a href="lich_su_tra_cuu.php">LỊCH SỬ</a>
+            <a href="word_history.php">LỊCH SỬ</a>
             <a href="tu_yeu_thich.php">DANH SÁCH TƯ VỰNG YÊU THÍCH</a>
         </div>
         <div class="user-menu">
