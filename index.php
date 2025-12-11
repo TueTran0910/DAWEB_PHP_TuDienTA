@@ -2,11 +2,12 @@
 session_start();
 // Kết nối CSDL
 include 'includes/connect_sql.php';
-// Kết nối AI Helper (Đảm bảo bạn đã tạo file này theo hướng dẫn trước)
-include 'includes/cohere_helper.php'; 
+// Kết nối AI Helper
+include 'includes/cohere_helper.php';
 
 // --- HÀM LƯU LỊCH SỬ TRA CỨU ---
-function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
+function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung)
+{
     // 1. Lấy từ vừa tra gần nhất của user này
     $check = $ket_noi->query("SELECT id_tuvung FROM lich_su WHERE id_user = $id_user ORDER BY thoi_gian_tra DESC LIMIT 1");
     $last_id = ($check && $check->num_rows > 0) ? $check->fetch_assoc()['id_tuvung'] : 0;
@@ -29,11 +30,12 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
     <title>Wordik - Học từ vựng vui nhộn</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="./css/index.css">
+    
+    <link rel="stylesheet" href="./css/index.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
-
+    
     <nav class="navbar">
         <a href="index.php" class="logo"><i class="fas fa-feather-alt"></i> Wordik</a>
 
@@ -45,7 +47,7 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
 
         <div class="user-menu">
             <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
-                <span style="font-weight: 700; margin-right: 10px;">Hi, <?php echo htmlspecialchars($_SESSION['ten_nguoi_dung']); ?></span>
+                <span class="user-name" style="font-weight: 700; margin-right: 10px;">Hi, <?php echo htmlspecialchars($_SESSION['ten_nguoi_dung']); ?></span>
                 <a href="pages/sign_out.php" class="btn btn-outline" style="border-color: #dc3545; color: #dc3545; box-shadow: 0 4px 0 #bd2130;">THOÁT</a>
             <?php else: ?>
                 <a href="pages/sign_in.php" class="btn btn-outline">ĐĂNG NHẬP</a>
@@ -77,7 +79,7 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                             <i class="fas fa-search"></i> TRA NGAY
                         </button>
                     </form>
-                    
+
                     <div class="tags-container" style="justify-content: flex-start;">
                         <span style="font-size: 13px; color: #999; display: flex; align-items: center;">Gợi ý:</span>
                         <a href="?tukhoa=Education" class="tag-chip">🏫 Education</a>
@@ -115,12 +117,12 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
 
         <?php
         // RANDOM TỪ VỰNG MỖI NGÀY
-        if(isset($ket_noi)) {
+        if (isset($ket_noi)) {
             $sql_random = "SELECT * FROM tu_vung ORDER BY RAND() LIMIT 1";
             $result_random = $ket_noi->query($sql_random);
-            if($result_random && $result_random->num_rows > 0){
+            if ($result_random && $result_random->num_rows > 0) {
                 $daily_word = $result_random->fetch_assoc();
-                ?>
+        ?>
                 <div class="daily-section">
                     <div class="daily-banner"></div>
                     <div class="daily-content">
@@ -140,7 +142,7 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                         </div>
                     </div>
                 </div>
-                <?php
+        <?php
             }
         }
         ?>
@@ -158,7 +160,7 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                         value="<?php echo htmlspecialchars($_GET['tukhoa']); ?>" required>
                     <button type="submit" class="btn btn-green">TRA CỨU</button>
                 </form>
-                
+
                 <div class="tags-container">
                     <a href="?tukhoa=Education" class="tag-chip">🏫 Education</a>
                     <a href="?tukhoa=Technology" class="tag-chip">💻 Technology</a>
@@ -172,7 +174,7 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
         if (isset($_GET['tukhoa']) && $_GET['tukhoa'] != '') {
             $tu_khoa = trim($_GET['tukhoa']);
 
-            if (isset($ket_noi)) { 
+            if (isset($ket_noi)) {
                 // --- BƯỚC 1: TÌM TRONG SQL ---
                 $sql = "SELECT * FROM tu_vung WHERE ten_tu_vung = ?";
                 $stmt = $ket_noi->prepare($sql);
@@ -187,11 +189,11 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                         if (isset($_SESSION['id_nguoi_dung'])) {
                             luu_lich_su_tra_cuu($ket_noi, $_SESSION['id_nguoi_dung'], $row['id_tuvung']);
                         }
-                        
+
                         // Hiển thị Card
                         hien_thi_card_tu_vung($row, $ket_noi, $tu_khoa, false);
                     }
-                } 
+                }
                 // NẾU KHÔNG CÓ -> HỎI AI
                 else {
                     $ai_data = tra_tu_cohere($tu_khoa);
@@ -203,9 +205,13 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                         // Lưu AI vào SQL để lần sau không tốn tiền API nữa
                         try {
                             $stmt_ins = $ket_noi->prepare("INSERT INTO tu_vung (ten_tu_vung, phat_am, loai_tu, nghia_tieng_viet, vi_du) VALUES (?, ?, ?, ?, ?)");
-                            $stmt_ins->bind_param("sssss", 
-                                $ai_data['ten_tu_vung'], $ai_data['phat_am'], 
-                                $ai_data['loai_tu'], $ai_data['nghia_tieng_viet'], $ai_data['vi_du']
+                            $stmt_ins->bind_param(
+                                "sssss",
+                                $ai_data['ten_tu_vung'],
+                                $ai_data['phat_am'],
+                                $ai_data['loai_tu'],
+                                $ai_data['nghia_tieng_viet'],
+                                $ai_data['vi_du']
                             );
                             $stmt_ins->execute();
                             $new_id = $ket_noi->insert_id;
@@ -214,15 +220,15 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                             if (isset($_SESSION['id_nguoi_dung']) && $new_id > 0) {
                                 luu_lich_su_tra_cuu($ket_noi, $_SESSION['id_nguoi_dung'], $new_id);
                             }
-                        } catch (Exception $e) { /* Bỏ qua lỗi insert */ }
-
+                        } catch (Exception $e) { /* Bỏ qua lỗi insert */
+                        }
                     } else {
                         // Không tìm thấy cả trong SQL lẫn AI
                         echo "
                         <div style='text-align:center; margin-top:50px;'>
                             <i class='fas fa-robot' style='font-size: 80px; color: #e5e5e5; margin-bottom: 20px;'></i>
                             <h2 style='color: #777;'>AI cũng bó tay rồi!</h2>
-                            <p style='color: #999;'>Từ '<b>".htmlspecialchars($tu_khoa)."</b>' khó quá hoặc không tồn tại.</p>
+                            <p style='color: #999;'>Từ '<b>" . htmlspecialchars($tu_khoa) . "</b>' khó quá hoặc không tồn tại.</p>
                         </div>";
                     }
                 }
@@ -230,7 +236,8 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
         }
 
         // HÀM HIỂN THỊ CARD (ĐỂ GỌN CODE)
-        function hien_thi_card_tu_vung($row, $ket_noi, $tu_khoa, $is_ai = false) {
+        function hien_thi_card_tu_vung($row, $ket_noi, $tu_khoa, $is_ai = false)
+        {
             // Logic yêu thích
             $da_thich = false;
             if (isset($_SESSION['id_nguoi_dung']) && isset($row['id_tuvung'])) {
@@ -240,12 +247,12 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                 $res_fav = $ket_noi->query($check_sql);
                 if ($res_fav && $res_fav->num_rows > 0) $da_thich = true;
             }
-            
+
             // Style AI: Viền tím
             $style = $is_ai ? "border: 2px solid #a29bfe; box-shadow: 0 8px 20px rgba(162, 155, 254, 0.2);" : "";
-            ?>
+        ?>
             <div class="result-card" style="<?php echo $style; ?>">
-                <?php if($is_ai): ?>
+                <?php if ($is_ai): ?>
                     <div style="text-align:right; margin-bottom:5px;">
                         <span style="background:#a29bfe; color:white; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:bold;">✨ AI Generated</span>
                     </div>
@@ -274,7 +281,7 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                 <?php endif; ?>
 
                 <div style="margin-top: 20px; text-align: right;">
-                    <?php if (isset($row['id_tuvung'])): 
+                    <?php if (isset($row['id_tuvung'])):
                         $link_thich = "pages/xu_ly_yeu_thich.php?id_tuvung=" . $row['id_tuvung'] . "&tukhoa=" . urlencode($tu_khoa);
                     ?>
                         <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
@@ -297,7 +304,7 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
                     <?php endif; ?>
                 </div>
             </div>
-            <?php
+        <?php
         }
         ?>
     </div>
@@ -331,13 +338,52 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung) {
         </div>
     </footer>
 
+    <style>
+        /* Mặc định ẩn trên Desktop */
+        .mobile-nav { display: none; }
+    </style>
+    
+    <div class="mobile-nav">
+        <a href="index.php" class="mobile-nav-item">
+            <i class="fas fa-home"></i> Trang chủ
+        </a>
+        <a href="./pages/word_list.php" class="mobile-nav-item">
+            <i class="fas fa-book"></i> Kho từ
+        </a>
+        <a href="./pages/tu_yeu_thich.php" class="mobile-nav-item">
+            <i class="fas fa-heart"></i> Yêu thích
+        </a>
+        <a href="./pages/word_history.php" class="mobile-nav-item">
+            <i class="fas fa-history"></i> Lịch sử
+        </a>
+    </div>
+
+    <div class="mobile-nav">
+        <a href="index.php" class="mobile-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Trang chủ</span>
+        </a>
+        <a href="./pages/word_list.php" class="mobile-nav-item">
+            <i class="fas fa-book"></i>
+            <span>Kho từ</span>
+        </a>
+        <a href="./pages/tu_yeu_thich.php" class="mobile-nav-item">
+            <i class="fas fa-heart"></i>
+            <span>Yêu thích</span>
+        </a>
+        <a href="./pages/word_history.php" class="mobile-nav-item">
+            <i class="fas fa-history"></i>
+            <span>Lịch sử</span>
+        </a>
+    </div>
+
     <script>
         function docTu(tu_vung) {
             if ('speechSynthesis' in window) {
                 var msg = new SpeechSynthesisUtterance();
                 msg.text = tu_vung;
                 msg.lang = 'en-US';
-                msg.rate = 0.8; 
+                msg.rate = 0.8;
                 window.speechSynthesis.speak(msg);
             } else {
                 alert("Trình duyệt không hỗ trợ âm thanh.");

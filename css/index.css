@@ -1,8 +1,8 @@
+/* --- GLOBAL VARIABLES & RESET --- */
 :root {
     --duo-green: #58cc02;
     --duo-green-dark: #46a302;
     --duo-green-light: #89e219;
-    /* Màu sáng để hover */
     --duo-blue: #1cb0f6;
     --duo-blue-dark: #1899d6;
     --duo-blue-light: #5ce5ff;
@@ -10,7 +10,6 @@
     --text-color: #3c3c3c;
     --bg-color: #ffffff;
     --card-shadow: 0 4px 0 #e5e5e5;
-    /* Shadow chuẩn Duolingo */
 }
 
 * {
@@ -26,7 +25,7 @@ body {
     line-height: 1.5;
 }
 
-/* --- ANIMATIONS (Hiệu ứng chuyển động) --- */
+/* --- ANIMATIONS --- */
 @keyframes float {
     0% {
         transform: translateY(0px);
@@ -93,7 +92,6 @@ body {
 
 .logo:hover {
     transform: scale(1.05);
-    /* Logo to lên xíu khi hover */
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -118,9 +116,19 @@ body {
     top: -2px;
 }
 
-/* --- BUTTONS STYLE NÂNG CẤP --- */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    /* Khoảng cách mặc định trên Desktop */
+}
+
+/* --- BUTTONS STYLE --- */
 .btn {
-    display: inline-block;
+    display: inline-flex;
+    /* Dùng inline-flex để căn giữa nội dung tốt hơn */
+    align-items: center;
+    justify-content: center;
     padding: 12px 24px;
     border-radius: 16px;
     text-decoration: none;
@@ -133,9 +141,10 @@ body {
     border: none;
     position: relative;
     top: 0;
+    line-height: 1;
+    /* Reset line-height để text căn giữa chuẩn */
 }
 
-/* Nút xanh dương */
 .btn-primary {
     background-color: var(--duo-blue);
     color: white;
@@ -151,7 +160,6 @@ body {
     top: 4px;
 }
 
-/* Nút trắng viền */
 .btn-outline {
     background-color: #fff;
     color: var(--duo-blue);
@@ -169,7 +177,6 @@ body {
     top: 4px;
 }
 
-/* Nút xanh lá */
 .btn-green {
     background-color: var(--duo-green);
     color: white;
@@ -195,11 +202,9 @@ body {
     margin: 0 auto;
     gap: 60px;
     animation: slideUp 0.8s ease-out;
-    /* Hero trượt lên khi load trang */
 }
 
 .hero-img i {
-    /* Hiệu ứng bay bay cho icon to */
     animation: float 3s ease-in-out infinite;
     filter: drop-shadow(0 10px 15px rgba(88, 204, 2, 0.2));
 }
@@ -250,15 +255,13 @@ body {
     color: #afafaf;
 }
 
-/* Hiệu ứng khi bấm vào ô tìm kiếm */
 .search-input:focus {
     border-color: var(--duo-blue);
     background: #fff;
     box-shadow: 0 0 0 4px rgba(28, 176, 246, 0.1);
-    /* Viền sáng mờ */
 }
 
-/* --- RESULT CARD (Thẻ kết quả) --- */
+/* --- RESULT CARD --- */
 .result-card {
     background: white;
     border: 2px solid #e5e5e5;
@@ -267,12 +270,10 @@ body {
     margin-top: 25px;
     box-shadow: var(--card-shadow);
     position: relative;
-    /* Hiệu ứng xuất hiện mượt mà */
     animation: slideUp 0.5s ease-out;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover vào thẻ thì thẻ nổi lên */
 .result-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 0 #e5e5e5;
@@ -346,7 +347,6 @@ body {
 
 .result-card:hover .example {
     border-color: #b8f28b;
-    /* Viền ví dụ hiện lên khi hover thẻ */
 }
 
 /* --- FEATURES GRID --- */
@@ -368,7 +368,6 @@ body {
 
 .feature-item:hover {
     transform: translateY(-5px);
-    /* Nổi lên khi hover */
     background: #fff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
@@ -382,7 +381,6 @@ body {
 
 .feature-item:hover .feature-icon {
     transform: scale(1.2) rotate(10deg);
-    /* Icon phóng to và xoay khi hover */
 }
 
 .feature-item h3 {
@@ -391,14 +389,13 @@ body {
     font-weight: 800;
 }
 
+/* --- HERO CONTAINER --- */
 .hero-container {
     position: relative;
     overflow: hidden;
-    /* Để cắt bớt mấy cái hình trang trí bay ra ngoài */
     padding: 60px 20px;
 }
 
-/* Các hình tròn trang trí nền */
 .blob {
     position: absolute;
     border-radius: 50%;
@@ -437,7 +434,6 @@ body {
 
 .hero-text-side {
     flex: 1.2;
-    /* Chiếm phần lớn hơn chút */
     text-align: left;
 }
 
@@ -478,7 +474,6 @@ body {
     max-width: 90%;
 }
 
-/* Phần hình ảnh bên phải */
 .hero-visual-side {
     flex: 0.8;
     position: relative;
@@ -492,12 +487,10 @@ body {
     font-size: 180px;
     color: var(--duo-green);
     filter: drop-shadow(0 20px 0 #46a302);
-    /* Bóng đổ cứng kiểu 3D */
     animation: float 4s ease-in-out infinite;
     z-index: 2;
 }
 
-/* Các icon bay nhỏ xung quanh */
 .floating-item {
     position: absolute;
     font-size: 40px;
@@ -513,7 +506,6 @@ body {
     transform: rotate(15deg);
 }
 
-/* Sao vàng */
 .f-item-2 {
     bottom: 40px;
     left: 10px;
@@ -522,7 +514,6 @@ body {
     transform: rotate(-10deg);
 }
 
-/* Sét xanh */
 .f-item-3 {
     top: 50%;
     right: -20px;
@@ -531,39 +522,7 @@ body {
     animation-delay: 2.5s;
 }
 
-/* Tim đỏ */
-
-/* Responsive cho phần mới */
-@media (max-width: 900px) {
-    .hero-wrapper {
-        flex-direction: column-reverse;
-        text-align: center;
-        gap: 30px;
-    }
-
-    .hero-text-side {
-        text-align: center;
-    }
-
-    .hero-desc {
-        margin: 0 auto 30px auto;
-    }
-
-    .blob {
-        display: none;
-    }
-
-    /* Ẩn blob trên mobile cho nhẹ */
-    .hero-visual-side {
-        height: 200px;
-    }
-
-    .main-icon {
-        font-size: 120px;
-    }
-}
-
-/* --- NEW 1: TOPIC TAGS (Thẻ chủ đề dưới thanh tìm kiếm) --- */
+/* --- TAGS CONTAINER --- */
 .tags-container {
     display: flex;
     justify-content: center;
@@ -592,7 +551,7 @@ body {
     box-shadow: 0 4px 0 #d1d1d1;
 }
 
-/* --- NEW 2: WORD OF THE DAY (Từ vựng của ngày) --- */
+/* --- DAILY WORD SECTION --- */
 .daily-section {
     background: #fff;
     max-width: 800px;
@@ -606,7 +565,6 @@ body {
 
 .daily-banner {
     background: #ffc107;
-    /* Màu vàng nổi bật */
     width: 15px;
 }
 
@@ -625,7 +583,7 @@ body {
     display: block;
 }
 
-/* --- NEW 3: FOOTER (Chân trang) --- */
+/* --- FOOTER --- */
 .footer {
     background: #fff;
     border-top: 2px solid #e5e5e5;
@@ -671,43 +629,136 @@ body {
     margin: 0 auto;
 }
 
-/* Responsive cho Footer */
+
 @media (max-width: 768px) {
-    .footer-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
+
+    /* 1. NAVBAR */
+    .navbar {
+        padding: 0 15px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
     }
 
-    .daily-section {
-        margin: 20px;
-        flex-direction: column;
-    }
-
-    .daily-banner {
-        width: 100%;
-        height: 10px;
-    }
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-    .hero {
-        flex-direction: column;
-        padding: 40px 20px;
-        text-align: center;
-        gap: 30px;
-    }
-
-    .hero-content {
-        text-align: center;
-    }
-
-    .features-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
+    .logo {
+        font-size: 20px;
     }
 
     .nav-links {
+        display: none;
+    }
+
+    /* Ẩn menu trên */
+
+    /* 2. USER MENU */
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .user-menu span {
+        display: none !important;
+        /* Ẩn Hi, Tuan */
+    }
+
+    /* Giữ nút Logout nhỏ – không full width */
+    .user-menu .btn {
+        width: auto !important;
+        padding: 5px 15px !important;
+        font-size: 11px !important;
+        height: 32px;
+        line-height: 1 !important;
+        /* Căn giữa chữ */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
+    /* 3. MENU DƯỚI ĐÁY (Hiện ra) */
+    .mobile-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border-top: 1px solid #e5e5e5;
+        justify-content: space-around;
+        padding: 8px 0;
+        z-index: 9999;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .mobile-nav-item {
+        text-align: center;
+        text-decoration: none;
+        color: #afafaf;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .mobile-nav-item i {
+        font-size: 20px;
+        margin-bottom: 4px;
+        color: #4b4b4b;
+    }
+
+    .mobile-nav-item:hover i,
+    .mobile-nav-item:hover {
+        color: var(--duo-green);
+    }
+
+    /* 4. NÚT Ở THÂN TRANG – CHO FULL WIDTH */
+    .hero-text-side .btn,
+    .search-form .btn,
+    .daily-content .btn,
+    .result-card .btn {
+        width: 100% !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    /* 5. CÁC PHẦN KHÁC */
+    .hero-wrapper {
+        flex-direction: column-reverse;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .hero-container {
+        padding: 30px 15px;
+    }
+
+    .hero-title {
+        font-size: 26px;
+    }
+
+    .hero-desc {
+        font-size: 15px;
+        margin: 0 auto 20px auto;
+    }
+
+    .hero-visual-side {
+        height: 160px;
+        margin-bottom: 10px;
+    }
+
+    .main-icon {
+        font-size: 90px;
+    }
+
+    .blob {
         display: none;
     }
 
@@ -715,12 +766,47 @@ body {
         flex-direction: column;
     }
 
-    .btn {
+    .search-input {
         width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .tags-container {
+        justify-content: center !important;
+    }
+
+    .result-card {
+        padding: 20px;
+    }
+
+    .word-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .features-grid,
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
         text-align: center;
     }
 
-    .english-word {
-        font-size: 24px;
+    .daily-section {
+        flex-direction: column;
+        margin: 20px 0;
+    }
+
+    .daily-banner {
+        width: 100%;
+        height: 6px;
+    }
+
+    /* Đẩy footer lên để không bị menu đáy che */
+    body {
+        padding-bottom: 70px;
+    }
+
+    .footer {
+        padding-bottom: 20px;
     }
 }

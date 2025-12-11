@@ -98,9 +98,10 @@ $result = $stmt->get_result();
     <nav class="navbar">
         <a href="../index.php" class="logo" style="margin-left: 20px;">Wordik</a>
         <div class="nav-links">
-            <a href="word_list.php">Kho từ</a>
-            <a href="tu_yeu_thich.php">Yêu thích</a>
+            <a href="word_list.php">Kho từ vựng</a>
             <a href="word_history.php" style="color: #58cc02; border-bottom: 2px solid #58cc02;">Lịch sử</a>
+            <a href="tu_yeu_thich.php">Danh sách từ vựng yêu thích</a>
+            
         </div>
         <div class="user-menu" style="margin-right: 20px;">
             <a href="../index.php" class="btn-outline">Trang chủ</a>
