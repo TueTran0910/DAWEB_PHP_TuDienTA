@@ -175,10 +175,17 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung)
             $tu_khoa = trim($_GET['tukhoa']);
 
             if (isset($ket_noi)) {
-                // --- BƯỚC 1: TÌM TRONG SQL ---
-                $sql = "SELECT * FROM tu_vung WHERE ten_tu_vung = ?";
+                // 1. Câu lệnh SQL có 2 dấu ? (cho Tiếng Anh và Tiếng Việt)
+                $sql = "SELECT * FROM tu_vung WHERE ten_tu_vung LIKE ? OR nghia_tieng_viet LIKE ?";
+                
                 $stmt = $ket_noi->prepare($sql);
-                $stmt->bind_param("s", $tu_khoa);
+                
+                // 2. Chuẩn bị từ khóa (thêm % để tìm gần đúng)
+                $param_search = "%" . $tu_khoa . "%";
+                
+                // 3. QUAN TRỌNG: "ss" nghĩa là 2 chuỗi, và $param_search phải được điền 2 lần
+                $stmt->bind_param("ss", $param_search, $param_search);
+                
                 $stmt->execute();
                 $ket_qua = $stmt->get_result();
 
@@ -189,47 +196,31 @@ function luu_lich_su_tra_cuu($ket_noi, $id_user, $id_tuvung)
                         if (isset($_SESSION['id_nguoi_dung'])) {
                             luu_lich_su_tra_cuu($ket_noi, $_SESSION['id_nguoi_dung'], $row['id_tuvung']);
                         }
-
+                        
                         // Hiển thị Card
                         hien_thi_card_tu_vung($row, $ket_noi, $tu_khoa, false);
                     }
                 }
                 // NẾU KHÔNG CÓ -> HỎI AI
                 else {
+                    // ... (Phần code gọi AI giữ nguyên) ...
                     $ai_data = tra_tu_cohere($tu_khoa);
-
+                    
                     if ($ai_data && isset($ai_data['nghia_tieng_viet'])) {
-                        // Hiển thị Card AI (Màu tím)
                         hien_thi_card_tu_vung($ai_data, $ket_noi, $tu_khoa, true);
-
-                        // Lưu AI vào SQL để lần sau không tốn tiền API nữa
+                        
+                        // Code lưu vào DB khi AI trả về (giữ nguyên logic cũ của bạn)
                         try {
                             $stmt_ins = $ket_noi->prepare("INSERT INTO tu_vung (ten_tu_vung, phat_am, loai_tu, nghia_tieng_viet, vi_du) VALUES (?, ?, ?, ?, ?)");
-                            $stmt_ins->bind_param(
-                                "sssss",
-                                $ai_data['ten_tu_vung'],
-                                $ai_data['phat_am'],
-                                $ai_data['loai_tu'],
-                                $ai_data['nghia_tieng_viet'],
-                                $ai_data['vi_du']
-                            );
+                            $stmt_ins->bind_param("sssss", $ai_data['ten_tu_vung'], $ai_data['phat_am'], $ai_data['loai_tu'], $ai_data['nghia_tieng_viet'], $ai_data['vi_du']);
                             $stmt_ins->execute();
                             $new_id = $ket_noi->insert_id;
-
-                            // Lưu lịch sử cho từ mới này
                             if (isset($_SESSION['id_nguoi_dung']) && $new_id > 0) {
                                 luu_lich_su_tra_cuu($ket_noi, $_SESSION['id_nguoi_dung'], $new_id);
                             }
-                        } catch (Exception $e) { /* Bỏ qua lỗi insert */
-                        }
+                        } catch (Exception $e) {}
                     } else {
-                        // Không tìm thấy cả trong SQL lẫn AI
-                        echo "
-                        <div style='text-align:center; margin-top:50px;'>
-                            <i class='fas fa-robot' style='font-size: 80px; color: #e5e5e5; margin-bottom: 20px;'></i>
-                            <h2 style='color: #777;'>AI cũng bó tay rồi!</h2>
-                            <p style='color: #999;'>Từ '<b>" . htmlspecialchars($tu_khoa) . "</b>' khó quá hoặc không tồn tại.</p>
-                        </div>";
+                        echo "<div style='text-align:center; margin-top:50px;'><h2 style='color: #777;'>Không tìm thấy!</h2></div>";
                     }
                 }
             }

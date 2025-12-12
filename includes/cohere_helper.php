@@ -3,23 +3,28 @@
 
 // HÀM 1: TRA TỪ (Dùng cho trang tìm kiếm)
 function tra_tu_cohere($tu_khoa) {
-    $apiKey = 'RSOYigrH1dJ3nSNX2p5rEgLAaW2PdLu1ZlHJGMOK';
-    
-    // Model bạn vừa tìm được
+    $apiKey = 'RSOYigrH1dJ3nSNX2p5rEgLAaW2PdLu1ZlHJGMOK'; 
     $modelName = 'command-r-08-2024'; 
 
-    $prompt = "Bạn là từ điển Anh-Việt. Hãy giải nghĩa từ: '$tu_khoa'.
-    Yêu cầu trả về JSON duy nhất, không có markdown (```json), không lời dẫn:
+    // --- CÂU LỆNH PROMPT MỚI (HỖ TRỢ 2 CHIỀU) ---
+    $prompt = "Bạn là từ điển song ngữ thông minh. Hãy xử lý từ khóa: '$tu_khoa'.
+    
+    Quy tắc xử lý:
+    1. Nếu '$tu_khoa' là Tiếng Anh: Hãy giải nghĩa sang Tiếng Việt.
+    2. Nếu '$tu_khoa' là Tiếng Việt: Hãy tìm từ vựng Tiếng Anh tương ứng chuẩn nhất (Ví dụ: 'Con mèo' -> 'Cat').
+    
+    Yêu cầu trả về JSON duy nhất với cấu trúc CỐ ĐỊNH (Không thay đổi tên key):
     {
-        \"ten_tu_vung\": \"$tu_khoa\",
-        \"phat_am\": \"phiên âm IPA\",
-        \"loai_tu\": \"loại từ (n, v, adj...)\",
-        \"nghia_tieng_viet\": \"nghĩa ngắn gọn\",
-        \"vi_du\": \"một câu ví dụ tiếng Anh chứa từ này\"
+        \"ten_tu_vung\": \"(Luôn là từ Tiếng Anh gốc)\",
+        \"phat_am\": \"(Phiên âm IPA của từ Tiếng Anh)\",
+        \"loai_tu\": \"(Loại từ: n, v, adj...)\",
+        \"nghia_tieng_viet\": \"(Nghĩa tiếng Việt ngắn gọn)\",
+        \"vi_du\": \"(Một câu ví dụ tiếng Anh chứa từ đó)\"
     }";
 
     return goi_api_cohere_v2($apiKey, $modelName, $prompt);
 }
+
 
 // HÀM 2: TẠO BÀI KIỂM TRA (Dùng cho trang Review)
 function tao_bai_kiem_tra($ds_tu_vung) {
