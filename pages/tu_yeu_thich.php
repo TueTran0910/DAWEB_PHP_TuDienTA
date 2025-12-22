@@ -128,7 +128,7 @@ if ($current_list_id != 'all') {
         <a href="../index.php" class="logo"><i class="fas fa-feather-alt"></i> Wordik</a>
         <div class="nav-links">
             <a href="word_list.php">KHO TỪ VỰNG</a>
-            <a href="lich_su_tra_cuu.php">LỊCH SỬ</a>
+            <a href="word_history.php">LỊCH SỬ</a>
             <a href="tu_yeu_thich.php">DANH SÁCH TỪ VỰNG YÊU THÍCH</a>
         </div>
         <div class="user-menu">
@@ -142,9 +142,7 @@ if ($current_list_id != 'all') {
         <aside class="sidebar">
             <div class="sidebar-title"><i class="fas fa-folder-open"></i> Danh Sách Của Tôi</div>
             
-            <a href="tu_yeu_thich.php?list=all" class="list-group-item <?php echo $current_list_id == 'all' ? 'active' : ''; ?>">
-                <span><i class="fas fa-layer-group"></i> Tất cả từ vựng</span>
-            </a>
+            
 
             <?php while ($lst = $result_lists->fetch_assoc()): ?>
                 <div class="list-group-item <?php echo $current_list_id == $lst['id_danh_sach'] ? 'active' : ''; ?>">
@@ -280,7 +278,7 @@ if ($current_list_id != 'all') {
                 formData.append('action', 'create_list_only'); // Gọi action mới chúng ta vừa thêm
                 formData.append('new_name', listName);
 
-                const res = await fetch('ajax_save_word.php', { method: 'POST', body: formData });
+                const res = await fetch('../ajax_save_word.php', { method: 'POST', body: formData });
                 const data = await res.json();
                 
                 if (data.status === 'success') {
@@ -313,7 +311,7 @@ if ($current_list_id != 'all') {
                 formData.append('id_list', id);
                 formData.append('new_name', newName);
 
-                const res = await fetch('ajax_save_word.php', { method: 'POST', body: formData });
+                const res = await fetch('../ajax_save_word.php', { method: 'POST', body: formData });
                 const data = await res.json();
                 
                 if (data.status === 'success') {
@@ -339,7 +337,7 @@ if ($current_list_id != 'all') {
                     formData.append('action', 'delete_list');
                     formData.append('id_list', id);
 
-                    const res = await fetch('ajax_save_word.php', { method: 'POST', body: formData });
+                    const res = await fetch('../ajax_save_word.php', { method: 'POST', body: formData });
                     const data = await res.json();
 
                     if (data.status === 'success') {

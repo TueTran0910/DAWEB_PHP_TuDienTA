@@ -96,15 +96,22 @@ $result = $stmt->get_result();
 <body>
 
     <nav class="navbar">
-        <a href="../index.php" class="logo" style="margin-left: 20px;">Wordik</a>
+        <a href="../index.php" class="logo"><i class="fas fa-feather-alt"></i> Wordik</a>
+
         <div class="nav-links">
-            <a href="word_list.php">Kho từ vựng</a>
-            <a href="word_history.php" style="color: #58cc02; border-bottom: 2px solid #58cc02;">Lịch sử</a>
-            <a href="tu_yeu_thich.php">Danh sách từ vựng yêu thích</a>
-            
+            <a href="/pages/word_list.php">KHO TỪ VỰNG</a>
+            <a href="/pages/word_history.php">LỊCH SỬ</a>
+            <a href="/pages/tu_yeu_thich.php">DANH SÁCH TỪ VỰNG YÊU THÍCH</a>
         </div>
-        <div class="user-menu" style="margin-right: 20px;">
-            <a href="../index.php" class="btn-outline">Trang chủ</a>
+
+        <div class="user-menu">
+            <?php if (isset($_SESSION['id_nguoi_dung'])): ?>
+                <span class="user-name" style="font-weight: 700; margin-right: 10px;">Hi, <?php echo htmlspecialchars($_SESSION['ten_nguoi_dung']); ?></span>
+                <a href="/pages/sign_out.php" class="btn btn-outline" style="border-color: #dc3545; color: #dc3545; box-shadow: 0 4px 0 #bd2130;">THOÁT</a>
+            <?php else: ?>
+                <a href="pages/sign_in.php" class="btn btn-outline">ĐĂNG NHẬP</a>
+                <a href="pages/register.php" class="btn btn-primary">BẮT ĐẦU</a>
+            <?php endif; ?>
         </div>
     </nav>
 

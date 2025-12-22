@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../includes/connect_sql.php';
+include './includes/connect_sql.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['id_nguoi_dung'])) {
